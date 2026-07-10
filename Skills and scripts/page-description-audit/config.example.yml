@@ -1,0 +1,34 @@
+# Copy to config.yml and adjust for your repo, then run:
+#   python scripts/audit_descriptions.py --config config.yml --apply
+
+docs_root: docs
+
+exclude_dirs:
+  - node_modules
+  - .git
+  - dist
+  - build
+  - .next
+
+# Frontmatter keys checked for an existing description, in priority order.
+# The first one found on a page is treated as *the* description for that
+# page. New descriptions are added under description_fields[0].
+description_fields:
+  - description
+  - page_description
+  - summary
+
+# Target length window for descriptions (characters). Used both as a
+# heuristic compliance check and as the target given to the model.
+min_len: 50
+max_len: 160
+
+# If true, every existing description gets a model judgment pass, even ones
+# that already pass the cheap heuristic checks in style_rules.py. Catches
+# subtler issues (passive voice, tone, doesn't match page content) the
+# heuristics can't -- at the cost of one API call per page, every run,
+# instead of only for flagged pages. Start with false; turn on for a
+# thorough one-off pass if you suspect heuristics are letting things through.
+verify_all_with_llm: false
+
+model: claude-sonnet-4-6

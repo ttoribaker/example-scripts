@@ -1,0 +1,52 @@
+name: Page description audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # every Monday at 06:00 UTC -- adjust to taste
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run page description audit
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/audit_descriptions.py \
+            --config config.yml \
+            --apply \
+            --report reports/description-audit-${{ github.run_number }}.md
+
+      - name: Upload report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: description-audit-report
+          path: reports/description-audit-${{ github.run_number }}.md
+
+      - name: Open PR with any changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: page description audit"
+          title: "Page description audit -- ${{ github.run_number }}"
+          body-path: reports/description-audit-${{ github.run_number }}.md
+          branch: description-audit/${{ github.run_number }}
+          delete-branch: true
+          add-paths: |
+            **/*.md
+            **/*.mdx
+            **/*.html
+            reports/**
