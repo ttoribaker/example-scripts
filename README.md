@@ -69,3 +69,31 @@ python scripts/audit_screenshots.py --config config.yml --apply
 ```
 
 Full details, config options, and how to tune the naming rules are in `README.md` in this repo / the tool's own docs.
+
+## Page description audit script
+
+A scheduled tool that keeps every page description field aligned with the Microsoft Writing Style Guide across a documentation repo. It scans all pages under a configured docs root, and for each one: adds a new description if the page has none, rewrites the description if it exists but doesn't comply (wrong case, too long/short, missing punctuation, marketing jargon, or other style issues Claude's vision catches), and leaves the page completely untouched if the description already complies. Descriptions are read from and written back to frontmatter fields (for example. `description:`) or an HTML `<meta name="description">` tag. Runs on a weekly GitHub Actions schedule (or on demand) and opens a pull request with the results for review. It never pushes directly to the default branch.
+
+### Setup
+
+1. Copy this folder into your docs repo.
+2. `pip install -r requirements.txt`
+3. Copy `config.example.yml` to `config.yml` and set `docs_root` and `description_fields` to match your repo's structure and frontmatter conventions.
+4. Add an `ANTHROPIC_API_KEY` secret: **Settings → Secrets and variables → Actions → New repository secret**.
+5. Commit `config.yml` and `.github/workflows/page-description-audit.yml`. The workflow runs automatically every Monday, or on demand using **Actions → Page description audit → Run workflow**.
+
+### Running locally
+
+```bash
+pip install -r requirements.txt
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# dry run — writes a report, changes nothing
+python scripts/audit_descriptions.py --config config.yml
+
+# apply: add missing descriptions, rewrite non-compliant ones
+python scripts/audit_descriptions.py --config config.yml --apply
+```
+
+Check `reports/description-audit-<date>.md` after either command: it lists every page under three headings (added / rewritten / left alone) with before/after text and the reason for each change.
+
