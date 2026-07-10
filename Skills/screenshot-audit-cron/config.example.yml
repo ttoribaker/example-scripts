@@ -1,0 +1,37 @@
+# Copy to config.yml and adjust for your repo, then run:
+#   python scripts/audit_screenshots.py --config config.yml --apply
+
+# Where your documentation pages (.md / .mdx / .html) live.
+docs_root: docs
+
+# Where image assets live, if different from docs_root (e.g. a shared
+# /static/images folder referenced by absolute path from every page).
+# Leave as null if images sit alongside their pages or under docs_root.
+images_root: null
+
+# How many directory levels below docs_root define a "page grouping" for
+# the image-count table. 1 means top-level folders (docs/api/*, docs/guides/*
+# each count as one grouping). Ignored for any page that has an explicit
+# `category:` / `section:` / `group:` frontmatter field -- that always wins.
+group_depth: 1
+
+exclude_dirs:
+  - node_modules
+  - .git
+  - dist
+  - build
+  - .next
+
+# A filename needs at least this many non-generic, non-numeric words to
+# count as descriptive.
+min_words: 2
+
+max_filename_length: 60
+
+# Perceptual-hash distance below which two images are flagged as possible
+# near-duplicates. Lower = stricter (fewer false positives, may miss some
+# real duplicates). 0-10 is a reasonable range; start at 5.
+near_duplicate_threshold: 5
+
+# Anthropic model used for vision-based rename suggestions.
+model: claude-sonnet-4-6
